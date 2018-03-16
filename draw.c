@@ -29,15 +29,6 @@ void add_box( struct matrix * edges,
   double x1 = x + width;
   double y1 = y - height;
   double z1 = z - depth;
-  //top left front x,y,z
-  //top right front x1,y,z
-  //bottom right front x1,y1,z
-  //bottom left front x,y1,z
-  //back face
-  //top left back x,y,z1
-  //top right back x1,y,z1
-  //bottom right back x1,y1,z1
-  //bottom left back x,y1,z1
   //front face
   add_edge(edges,x,y,z,x1,y,z);
   add_edge(edges,x1,y,z,x1,y1,z);
@@ -48,7 +39,7 @@ void add_box( struct matrix * edges,
   add_edge(edges,x1,y,z1,x1,y1,z1);
   add_edge(edges,x1,y1,z1,x,y1,z1);
   add_edge(edges,x,y1,z1,x,y,z1);
-  //connect
+  //connect faces
   add_edge(edges,x,y,z,x,y,z1);
   add_edge(edges,x1,y,z,x1,y,z1);
   add_edge(edges,x1,y1,z,x1,y1,z1);
@@ -76,9 +67,7 @@ void add_sphere( struct matrix * edges,
                  double r, int step ) {
   struct matrix *s = generate_sphere(cx,cy,cz,r,step);
   int i;
-  for(i = 0; i < s->lastcol; i++){
-    //printf("%0.2lf %0.2lf %0.2lf\n",s->m[0][i],s->m[1][i],s->m[2][i]);
-	   
+  for(i = 0; i < s->lastcol; i++){	   
     add_edge(edges,s->m[0][i],s->m[1][i],s->m[2][i],
 	      s->m[0][i] + 1,s->m[1][i] + 1,s->m[2][i] + 1);
   }
@@ -101,19 +90,20 @@ struct matrix * generate_sphere(double cx, double cy, double cz,
                                 double r, int step ) {
   struct matrix *s = new_matrix(4,4);
   double x0, y0, z0, x1, y1, z1, t, phi;
-  int i,p;
+  int i,j;
 
   //x = rcostheta + cx
   //y = rsintheta * cosphi + cy
   //z = rsintheta * sinphi + cz
-  
-  x0 = r * cos(2 * M_PI * 0) + cx;
-  y0 = r * sin(2 * M_PI * 0) * cos(2 * M_PI * 0) + cy;
-  z0 = r * sin(2 * M_PI * 0) * sin(2 * M_PI * 0) + cz;
+
+  //when theta and phi are 0
+  x0 = r + cx;
+  y0 = cy;
+  z0 = cz;
   add_point(s,x0,y0,z0);
 
-  for(p=1; p<=step;p++){
-    phi = (double)p/step;
+  for(j=1; j<=step;j++){
+    phi = (double)j/step;
     for (i=1; i<=step/2; i++) {
       t = (double)i/step;
       x1 = r * cos(2 * M_PI * t) + cx;
@@ -148,9 +138,7 @@ void add_torus( struct matrix * edges,
                 double r1, double r2, int step ) {
   struct matrix *s = generate_torus(cx,cy,cz,r1,r2,step);
   int i;
-  for(i = 0; i < s->lastcol; i++){
-    //printf("%0.2lf %0.2lf %0.2lf\n",s->m[0][i],s->m[1][i],s->m[2][i]);
-	   
+  for(i = 0; i < s->lastcol; i++){   
     add_edge(edges,s->m[0][i],s->m[1][i],s->m[2][i],
 	      s->m[0][i] + 1,s->m[1][i] + 1,s->m[2][i] + 1);
   }
@@ -173,19 +161,20 @@ struct matrix * generate_torus( double cx, double cy, double cz,
                                 double r1, double r2, int step ) {
   struct matrix *s = new_matrix(4,4);
   double x0, y0, z0, x1, y1, z1, t, phi;
-  int i,p;
+  int i,j;
 
   //x = cosphi(rcostheta + R) + cx
   //y = rsintheta + cy = y
   //z = -sinphi(rcostheta + R) + cz 
-  
-  x0 = cos(2 * M_PI * 0) * (r1 * cos(2 * M_PI * 0) + r2) + cx;
-  y0 = r1 * sin(2 * M_PI * 0) + cy;
-  z0 = (-1 * sin(2 * M_PI * 0) * (r1 * cos(2 * M_PI * 0) + r2)) + cz;
+
+  //when theta and phi are 0
+  x0 = r1 + r2 + cx;
+  y0 = cy;
+  z0 = cz;
   add_point(s,x0,y0,z0);
 
-  for(p=1; p<=step;p++){
-    phi = (double)p/step;
+  for(j=1; j<=step;j++){
+    phi = (double)j/step;
     for (i=1; i<=step; i++) {
       t = (double)i/step;
       x1 = cos(2 * M_PI * phi) * (r1 * cos(2 * M_PI * t) + r2) + cx;
