@@ -91,8 +91,11 @@ void parse_file ( char * filename,
     double yvals[4];
     double zvals[4];
     struct matrix *tmp;
-    double r;
+    double r, r1;
     double theta;
+    double width;
+    double height;
+    double depth;
     char axis;
     int type;
     int step = 100;
@@ -106,6 +109,33 @@ void parse_file ( char * filename,
       add_circle( edges, xvals[0], yvals[0], zvals[0], r, step);
     }//end of circle
 
+    else if( strncmp(line, "box", strlen(line)) == 0){
+      fgets(line, sizeof(line), f);
+      //printf("BOX\t%s", line);
+
+      sscanf(line, "%lf %lf %lf %lf %lf %lf",
+	     xvals, yvals, zvals, &width, &height, &depth);
+      add_box( edges, xvals[0], yvals[0], zvals[0], width, height, depth);
+    }//end of box
+
+    else if( strncmp(line, "sphere", strlen(line)) == 0){
+      fgets(line, sizeof(line), f);
+      //printf("SPHERE\t%s", line);
+
+      sscanf(line, "%lf %lf %lf %lf",
+	     xvals, yvals, zvals, &r);
+      add_sphere( edges, xvals[0], yvals[0], zvals[0], r, 50);
+    }//end of sphere
+
+    else if( strncmp(line, "torus", strlen(line)) == 0){
+      fgets(line, sizeof(line), f);
+      //printf("TORUS\t%s", line);
+
+      sscanf(line, "%lf %lf %lf %lf %lf",
+	     xvals, yvals, zvals, &r, &r1);
+      add_torus( edges, xvals[0], yvals[0], zvals[0], r, r1, 30);
+    }//end of torus
+    
     else if ( strncmp(line, "hermite", strlen(line)) == 0 ||
 	      strncmp(line, "bezier", strlen(line)) == 0 ) {
       if (strncmp(line, "hermite", strlen(line)) == 0 )
@@ -192,6 +222,13 @@ void parse_file ( char * filename,
     else if ( strncmp(line, "apply", strlen(line)) == 0 ) {
       //printf("APPLY\t%s", line);
       matrix_mult(transform, edges);
+    }//end apply
+
+    else if ( strncmp(line, "clear", strlen(line)) == 0 ) {
+      //printf("CLEAR\t%s", line);
+      //clear edges
+      free_matrix(edges);
+      edges = new_matrix(4, 4);
     }//end apply
     
     else if ( strncmp(line, "display", strlen(line)) == 0 ) {
